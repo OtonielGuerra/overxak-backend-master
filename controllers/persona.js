@@ -86,8 +86,7 @@ function crearPersona(req, res){
     
     if(params.primer_nombre && params.primer_apellido &&
         params.fecha_nacimiento && params.religion && params.correos && params.genero &&
-        params.departamento && params.municipio && params.zona && params.avenida && params.calle && params.noCasa &&
-        params.celular && params.casa){
+        params.departamento && params.municipio && params.zona && params.avenida && params.calle && params.noCasa){
         
             persona.primer_nombre = params.primer_nombre.toUpperCase();
             persona.segundo_nombre = params.segundo_nombre.toUpperCase();
@@ -100,26 +99,41 @@ function crearPersona(req, res){
             persona.genero = params.genero.toUpperCase();
             persona.rol = params.role.toUpperCase();
 
-            
-                persona.direccion.departamento = params.departamento.toUpperCase(),
-                persona.direccion.municipio = params.municipio.toUpperCase(),
-                persona.direccion.zona = params.zona.toUpperCase(),
-                persona.direccion.avenida = params.avenida.toUpperCase(),
-                persona.direccion.calle = params.calle.toUpperCase(),
-                persona.direccion.noCasa = params.noCasa.toUpperCase()
-            
-            
 
-                persona.telefonos.celular = params.celular,
-                persona.telefonos.casa = params.casa,
-                persona.telefonos.otro = params.otro
+            console.log(params.departamento.toUpperCase(),
+            persona.direccion.municipio = params.municipio.toUpperCase(),
+            persona.direccion.zona = params.zona.toUpperCase(),
+            persona.direccion.avenida = params.avenida.toUpperCase(),
+            persona.direccion.calle = params.calle.toUpperCase(),
+            persona.direccion.noCasa = params.noCasa.toUpperCase(),
+            persona.direccion.sector = params.sector.toUpperCase(),
+            persona.direccion.cuadra = params.cuadra.toUpperCase(),
+            persona.direccion.edificio = params.edificio.toUpperCase(),
+            persona.direccion.piso = params.piso.toUpperCase(),
+            persona.direccion.apto = params.apto.toUpperCase())
             
+                persona.direccion.departamento = params.departamento.toUpperCase();
+                persona.direccion.municipio = params.municipio.toUpperCase();
+                persona.direccion.zona = params.zona.toUpperCase();
+                persona.direccion.avenida = params.avenida.toUpperCase();
+                persona.direccion.calle = params.calle.toUpperCase();
+                persona.direccion.noCasa = params.noCasa.toUpperCase();
+                persona.direccion.sector = params.sector.toUpperCase();
+                persona.direccion.cuadra = params.cuadra.toUpperCase();
+                persona.direccion.edificio = params.edificio.toUpperCase();
+                persona.direccion.piso = params.piso.toUpperCase();
+                persona.direccion.apto = params.apto.toUpperCase();
 
+        
         persona.save((err, personaSave)=>{
             if(err){
                 console.log(err);
                 res.status(500).send({message: 'Usuario no guardado'})
             }else{
+                Persona.findByIdAndUpdate({_id: personaSave._id}, {$push: {telefonos: {$each: params.numeros}}}, {new: true}, (err, ok) => {
+                    if(err) console.log(err)
+                    else console.log(ok)
+                })
                 res.status(200).send({personaSave});
             }
         })
@@ -134,35 +148,36 @@ function crearFamilia(req, res){
     var familia = new Familia();
     var params = req.body;
     if(params.padre && params.madre && params.encargado){
-        familia.padre.id = params.padre._id;
-        familia.madre.id = params.madre._id;
-        familia.encargado.id = params.encargado._id;
-        familia.encargado.name = params.encargado.primer_nombre + " " + params.encargado.primer_apellido;
-        console.log('Hijo:' + params.hijos[0].primer_nombre)
-
-        familia.padre.name = params.padre.primer_nombre + " " + params.padre.primer_apellido;
-        familia.madre.name = params.madre.primer_nombre + " " + params.madre.primer_apellido;
-        params.hijos.forEach(function(v) {
-            familia.hijos.id = v._id;
-            familia.hijos.name = v.primer_nombre + " " + v.primer_apellido;
-        })
-
-        
-
-        familia.save((err, familiaSave) => {
-            if(err){
-                res.status(404).send({message: 'Error al guardar la familia'});
+        Familia.find({"padre.id": params.padre._id}, (err, count) => {
+            if(count.length >= 2){
+                res.status(200).send({message: 'No puede tener más de 2 familias'})
             }else{
-                Familia.findByIdAndUpdate({_id: familiaSave._id}, {$push: {hijos: {$each: params.hijos}}}, (err, ok) => {
+                familia.name = params.padre.primer_apellido + " " + params.madre.primer_apellido;
+                familia.padre.id = params.padre._id;
+                familia.madre.id = params.madre._id;
+                familia.padre.name = params.padre.primer_nombre + " " + params.padre.primer_apellido; 
+                familia.madre.name = params.madre.primer_nombre + " " + params.madre.primer_apellido;
+                familia.encargado.name = params.encargado.primer_nombre + " " + params.encargado.primer_apellido;
+                familia.encargado.id = params.encargado._id;
+                familia.save((err, familiaSave) => {
                     if(err){
-                        console.log(err)
+                        res.status(404).send({message: 'Error al guardar la familia'});
                     }else{
-                        console.log(ok)
+                        res.status(200).send({familiaSave});
+                        Familia.findByIdAndUpdate({_id: familiaSave._id}, {$push: {hijos: {$each: params.hijos}}}, {new: true}, (err, ok) => {
+                            if(err){
+                                console.log(err)
+                            }else{
+                                
+                            }
+                            
+                        })
+                        
                     }
                 })
-                res.status(200).send({familiaSave});
             }
         })
+
     }else{
         res.status(404).send({message: 'Ingrese los datos solicitados'})
     }

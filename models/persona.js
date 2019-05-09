@@ -22,16 +22,16 @@ var PersonaSchema = Schema({
             avenida: String,
             calle: String,
             manzana: String,
-            noCasa : String
+            noCasa : String,
+            sector: String,
+            cuadra: String,
+            edificio: String,
+            piso: String,
+            apto: String
         }
     
     ,
-    telefonos : 
-        {
-            celular: Number,
-            casa: Number,
-            otro: Number
-        }
+    telefonos : Array
     
 });
 
